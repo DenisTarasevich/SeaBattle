@@ -33,8 +33,6 @@ namespace SeaBattle
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            string s = Tag.ToString();
-            MessageBox.Show(s);
         }
 
     }
