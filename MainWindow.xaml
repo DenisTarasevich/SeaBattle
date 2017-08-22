@@ -1,0 +1,102 @@
+﻿<Window x:Class="SeaBattle.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="SeaBattle" Height="500" Width="500"
+        WindowStartupLocation="CenterScreen"
+        x:Name="rootWindow"
+        Loaded="MainWindow_Loaded"
+        ResizeMode="NoResize">
+
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        
+        <ListView
+        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+        Margin="0"
+        Padding="0"
+        Name="MyField"
+        ItemsSource="{Binding MyShips}"
+        Grid.Column="0"
+        Grid.Row="0">
+            <ListView.ItemTemplate>
+            <DataTemplate>
+                <Button 
+                    Background="{Binding Background}"
+                    IsEnabled="{Binding IsEnabled}"
+                    Margin="-0.4"
+                    Padding="0"
+                    Width="22"
+                    Height="Auto"
+                    Content="{Binding Name}" 
+                    Command="{Binding ElementName=rootWindow,
+                    Path=DataContext.SetShipCommand}"
+                    CommandParameter="{Binding}"/>
+            </DataTemplate>
+                </ListView.ItemTemplate>
+            <ListView.ItemsPanel>
+            <ItemsPanelTemplate>
+                <WrapPanel 
+                    Margin="0"
+                    Width="{Binding
+                    ElementName=MyField, Path=ActualWidth}"/>
+            </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+            </ListView>
+
+        
+        
+    <ListView
+        ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+        SelectionMode="Single"
+        Margin="0"
+        Padding="0"
+        Name="EnemyField"
+        ItemsSource="{Binding EnemyShips}"
+        Grid.Column="2"
+        Grid.Row="0">
+        
+                <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Button 
+                    Tag="{Binding Name}"
+                    Background="{Binding Background}"
+                    IsEnabled="{Binding IsEnabled}"
+                    Margin="-0.4"
+                    Padding="0"
+                    Width="22"
+                    Height="Auto"
+                    Content="{Binding Name}" 
+                    Click="Button_Click"
+                    Command="{Binding ShotCommand}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel 
+                    Margin="0"
+                    Width="{Binding
+                    ElementName=EnemyField, Path=ActualWidth}"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+        </ListView>
+
+        <Button Grid.Column="2"
+                Grid.Row="1"
+                Command="{Binding ShotCommand}"
+                CommandParameter="{Binding SelectedItem, ElementName=EnemyField}"
+                VerticalAlignment="Center"
+                Margin="10, 0"
+                Padding="10, 0">Зааааааалп!</Button>
+         </Grid>
+</Window>
