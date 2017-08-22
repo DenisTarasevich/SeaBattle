@@ -11,3 +11,5 @@ C:\Documents and Settings\Admin\Рабочий стол\SeaBattle\SeaBattle\bin\
 C:\Documents and Settings\Admin\Рабочий стол\SeaBattle\SeaBattle\bin\Debug\SeaBattle.pdb
 C:\Documents and Settings\Admin\Рабочий стол\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.exe
 C:\Documents and Settings\Admin\Рабочий стол\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.pdb
+C:\Users\Square\Desktop\21 августа\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.exe
+C:\Users\Square\Desktop\21 августа\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.pdb
