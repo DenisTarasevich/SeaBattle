@@ -105,7 +105,10 @@ namespace SeaBattle
 
         public void Shot(Ship x)
         {
-            
+            if (x != null)
+            {
+                MessageBox.Show(x.Name.ToString());
+            }
         }
 
 

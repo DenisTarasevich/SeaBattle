@@ -33,14 +33,15 @@
                 <Button 
                     Background="{Binding Background}"
                     IsEnabled="{Binding IsEnabled}"
+                    Tag="{Binding}"
                     Margin="-0.4"
                     Padding="0"
                     Width="22"
                     Height="Auto"
                     Content="{Binding Name}" 
+                    Click="Button_Click"
                     Command="{Binding ElementName=rootWindow,
-                    Path=DataContext.SetShipCommand}"
-                    CommandParameter="{Binding}"/>
+                    Path=DataContext.SetShipCommand}"/>
             </DataTemplate>
                 </ListView.ItemTemplate>
             <ListView.ItemsPanel>
@@ -68,7 +69,7 @@
                 <ListView.ItemTemplate>
                 <DataTemplate>
                     <Button 
-                    Tag="{Binding Name}"
+                    Tag="{Binding}"
                     Background="{Binding Background}"
                     IsEnabled="{Binding IsEnabled}"
                     Margin="-0.4"
