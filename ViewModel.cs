@@ -82,7 +82,14 @@ namespace SeaBattle
                 Ship test = new Ship();
                 test.Content = "";
                 test.Name = i;
-                test.Deck = 0;
+                if (i % 2 == 0)
+                {
+                    test.Deck = 0;
+                }
+                else
+                {
+                    test.Deck = 1;
+                }
                 test.IsEnabled = true;
                 test.Background = "Gray";
                 MyShips.Add(test);
@@ -107,10 +114,86 @@ namespace SeaBattle
         {
             if (x != null)
             {
-                MessageBox.Show(x.Name.ToString());
+                TcpListener listener = null;
+                try
+                {
+                    listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
+                        listener.Start();
+                        TcpClient newClient = listener.AcceptTcpClient();
+
+                        NetworkStream tcpStream = newClient.GetStream();
+
+                        string send = x.Name.ToString(); // начало формирования ответа
+                        byte[] msg = Encoding.UTF8.GetBytes(send);
+                        tcpStream.Write(msg, 0, msg.Length);
+
+
+                        byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
+                        tcpStream.Read(bytes, 0, bytes.Length);
+                        MessageBox.Show("Полученный текст: " +
+    Encoding.UTF8.GetString(bytes, 0, bytes.Length)); // получили инфу
+
+
+                        tcpStream.Close();
+                    }
+
+                catch (SocketException ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.ToString());
+                }
+
+                finally
+                {
+                    if (listener != null)
+                    {
+                        listener.Stop();
+                    }
+                }
             }
         }
 
+        public void Client(Ship x)
+        {
+            try
+            {
+                TcpClient client = new TcpClient();
 
+                client.Connect("127.0.0.1", 11111);
+
+                NetworkStream tcpStream = client.GetStream();
+
+                byte[] bytes = new byte[client.ReceiveBufferSize]; // буфер входящей информации
+                tcpStream.Read(bytes, 0, bytes.Length);
+
+                // проверка попал ли запрос по кораблю
+                string str = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                int read = Convert.ToInt32(str);
+                if (MyShips.ElementAt(read).Deck == 0)
+                {
+                    string negative = "Промах по клетке " + read;
+                    byte[] ans = Encoding.UTF8.GetBytes(negative);
+                    tcpStream.Write(ans, 0, ans.Length);
+                }
+                else
+                {
+                    string positive = "Убит по клетке " + read;
+                    byte[] ans = Encoding.UTF8.GetBytes(positive);
+                    tcpStream.Write(ans, 0, ans.Length);
+                }
+
+                tcpStream.Close();
+                client.Close();
+            }
+
+            catch (SocketException ex)
+            {
+                MessageBox.Show("Exception: " + ex.ToString());
+            }
+
+        }
     }
 }

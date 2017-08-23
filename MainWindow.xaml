@@ -7,7 +7,6 @@
         Loaded="MainWindow_Loaded"
         ResizeMode="NoResize">
 
-
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
