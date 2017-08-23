@@ -3,24 +3,11 @@ using Model;
 using Common;
 using System.Net;
 using System.Net.Sockets;
-using System.Globalization;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Markup;
 using System.Linq;
-using System.Xml;
-using System.Xml.Serialization;
 using System.Text;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
 
 namespace SeaBattle
 {
@@ -73,6 +60,8 @@ namespace SeaBattle
 
         public RelayCommand<Ship> ShotCommand { get; set; }
 
+        static int serverorclient { get; set; } // кто сервер, а кто клиент
+
         public ViewModel()
         {
             MyShips = new ObservableCollection<Ship>();
@@ -107,84 +96,104 @@ namespace SeaBattle
 
         public void LoadData()
         {
-
+            if (
+                MessageBox.Show("Вы сервер?", "Время выбирать, каналья!", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                == MessageBoxResult.Yes
+                )
+            {
+                serverorclient = 1;
+            }
+            else
+            {
+                serverorclient = 0;
+            }
         }
 
         public void Shot(Ship x)
         {
-            if (x != null)
+            switch (serverorclient)
             {
-                TcpListener listener = null;
-                try
+                case 1: Server(x); break;
+                case 0: SecondPlayer(); break;
+            }
+        }
+
+        public void Server(Ship x)
+        { 
+            if (x != null)
+        {
+            TcpListener listener = null;
+            try
+            {
+                listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
+                listener.Start();
+                TcpClient newClient = listener.AcceptTcpClient();
+
+                NetworkStream tcpStream = newClient.GetStream();
+
+                string send = x.Name.ToString(); // начало формирования ответа
+                byte[] msg = Encoding.UTF8.GetBytes(send);
+                tcpStream.Write(msg, 0, msg.Length);
+
+
+                byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
+                tcpStream.Read(bytes, 0, bytes.Length);
+                string input = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                int shoting = Convert.ToInt32(input);
+                if (shoting == 0)
                 {
-                    listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
-                    listener.Start();
-                    TcpClient newClient = listener.AcceptTcpClient();
-
-                    NetworkStream tcpStream = newClient.GetStream();
-
-                    string send = x.Name.ToString(); // начало формирования ответа
-                    byte[] msg = Encoding.UTF8.GetBytes(send);
-                    tcpStream.Write(msg, 0, msg.Length);
-
-
-                    byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
-                    tcpStream.Read(bytes, 0, bytes.Length);
-                    string input = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                    int shoting = Convert.ToInt32(input);
-                    if (shoting == 0)
+                    EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                    Ship shot = new Ship();
+                    shot.Content = "";
+                    shot.Name = "O";
+                    shot.Background = "Orange";
+                    shot.IsEnabled = false;
+                    EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                }
+                else
+                {
+                    if (shoting == 1)
                     {
-                        EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
-                        Ship shot = new Ship();
-                        shot.Content = "";
-                        shot.Name = "O";
-                        shot.IsEnabled = false;
-                        EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                    EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                    Ship shot = new Ship();
+                    shot.Content = "";
+                    shot.Name = "X";
+                    shot.Background = "Orange";
+                    shot.IsEnabled = false;
+                    EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
                     }
                     else
                     {
-                        if (shoting == 1)
-                        {
                         EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
                         Ship shot = new Ship();
                         shot.Content = "";
-                        shot.Name = "X";
+                        shot.Name = "3";
                         shot.IsEnabled = false;
                         EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
-                        }
-                        else
-                        {
-                            EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
-                            Ship shot = new Ship();
-                            shot.Content = "";
-                            shot.Name = "3";
-                            shot.IsEnabled = false;
-                            EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
-                        }
                     }
-
-                        tcpStream.Close();
-                    }
-
-                catch (SocketException ex)
-                {
-                    MessageBox.Show(ex.ToString());
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.ToString());
                 }
 
-                finally
+                    tcpStream.Close();
+                }
+
+            catch (SocketException ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+
+            finally
+            {
+                if (listener != null)
                 {
-                    if (listener != null)
-                    {
-                        listener.Stop();
-                    }
+                    listener.Stop();
                 }
             }
-            SecondPlayer();
         }
+    }
 
 
         public void SecondPlayer()

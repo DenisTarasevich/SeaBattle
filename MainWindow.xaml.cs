@@ -31,20 +31,17 @@ namespace SeaBattle
             this.xxx.LoadData();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e) // связь
         {
             object number = (sender as Button).Tag;
             if ((sender as Button).IsDescendantOf(EnemyField))
             {
                 EnemyField.SelectedIndex = EnemyField.Items.IndexOf(number);
-                (sender as Button).Background = Brushes.Orange;
             }
             if ((sender as Button).IsDescendantOf(MyField))
             {
                 MyField.SelectedIndex = MyField.Items.IndexOf(number);
-                (sender as Button).Background = Brushes.Green;
             }
         }
-
     }
 }
