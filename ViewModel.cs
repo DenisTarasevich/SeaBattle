@@ -77,11 +77,11 @@ namespace SeaBattle
         {
             MyShips = new ObservableCollection<Ship>();
             EnemyShips = new ObservableCollection<Ship>();
-            for (int i = 1; i < 101; i++)
+            for (int i = 0; i < 100; i++)
             {
                 Ship test = new Ship();
                 test.Content = "";
-                test.Name = i;
+                test.Name = i.ToString();
                 if (i % 2 == 0)
                 {
                     test.Deck = 0;
@@ -96,7 +96,7 @@ namespace SeaBattle
 
                 Ship test2 = new Ship();
                 test2.Content = "";
-                test2.Name = i;
+                test2.Name = i.ToString();
                 test2.Deck = 0;
                 test2.IsEnabled = true;
                 test2.Background = "Gray";
@@ -118,21 +118,50 @@ namespace SeaBattle
                 try
                 {
                     listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
-                        listener.Start();
-                        TcpClient newClient = listener.AcceptTcpClient();
+                    listener.Start();
+                    TcpClient newClient = listener.AcceptTcpClient();
 
-                        NetworkStream tcpStream = newClient.GetStream();
+                    NetworkStream tcpStream = newClient.GetStream();
 
-                        string send = x.Name.ToString(); // начало формирования ответа
-                        byte[] msg = Encoding.UTF8.GetBytes(send);
-                        tcpStream.Write(msg, 0, msg.Length);
+                    string send = x.Name.ToString(); // начало формирования ответа
+                    byte[] msg = Encoding.UTF8.GetBytes(send);
+                    tcpStream.Write(msg, 0, msg.Length);
 
 
-                        byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
-                        tcpStream.Read(bytes, 0, bytes.Length);
-                        MessageBox.Show("Полученный текст: " +
-    Encoding.UTF8.GetString(bytes, 0, bytes.Length)); // получили инфу
-
+                    byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
+                    tcpStream.Read(bytes, 0, bytes.Length);
+                    string input = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                    int shoting = Convert.ToInt32(input);
+                    if (shoting == 0)
+                    {
+                        EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                        Ship shot = new Ship();
+                        shot.Content = "";
+                        shot.Name = "O";
+                        shot.IsEnabled = false;
+                        EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                    }
+                    else
+                    {
+                        if (shoting == 1)
+                        {
+                        EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                        Ship shot = new Ship();
+                        shot.Content = "";
+                        shot.Name = "X";
+                        shot.IsEnabled = false;
+                        EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                        }
+                        else
+                        {
+                            EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                            Ship shot = new Ship();
+                            shot.Content = "";
+                            shot.Name = "3";
+                            shot.IsEnabled = false;
+                            EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                        }
+                    }
 
                         tcpStream.Close();
                     }
@@ -154,9 +183,11 @@ namespace SeaBattle
                     }
                 }
             }
+            SecondPlayer();
         }
 
-        public void Client(Ship x)
+
+        public void SecondPlayer()
         {
             try
             {
@@ -174,15 +205,27 @@ namespace SeaBattle
                 int read = Convert.ToInt32(str);
                 if (MyShips.ElementAt(read).Deck == 0)
                 {
-                    string negative = "Промах по клетке " + read;
+                    string negative = "0";
                     byte[] ans = Encoding.UTF8.GetBytes(negative);
                     tcpStream.Write(ans, 0, ans.Length);
+                    MyShips.RemoveAt(read);
+                    Ship shot = new Ship();
+                    shot.Content = "";
+                    shot.Name = "O";
+                    shot.IsEnabled = false;
+                    MyShips.Insert(read, shot);
                 }
                 else
                 {
-                    string positive = "Убит по клетке " + read;
+                    string positive = "1";
                     byte[] ans = Encoding.UTF8.GetBytes(positive);
                     tcpStream.Write(ans, 0, ans.Length);
+                    MyShips.RemoveAt(read);
+                    Ship shot = new Ship();
+                    shot.Content = "";
+                    shot.Name = "X";
+                    shot.IsEnabled = false;
+                    MyShips.Insert(read, shot);
                 }
 
                 tcpStream.Close();
