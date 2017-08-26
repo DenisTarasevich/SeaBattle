@@ -69,6 +69,8 @@ namespace SeaBattle
         public RelayCommand<Ship> ResetCommand { get; set; }
         static int sh { get; set; }
         TcpListener listener = null;
+        BackgroundWorker backgroundWorker;
+        Dispatcher _dispatcher;
         public ViewModel()
         {
             MyShips = new ObservableCollection<Ship>();
@@ -96,6 +98,7 @@ namespace SeaBattle
             SetShipCommand = new RelayCommand<Ship>(SetShip);
             ResetCommand = new RelayCommand<Ship>(Reset);
             sh = 20; // счетчик палуб (четыре, три, три, два два два, одинодинодинодин)
+            _dispatcher = Dispatcher.CurrentDispatcher;
         }
 
 
@@ -683,7 +686,9 @@ namespace SeaBattle
                     )
                 {
                     MessageBox.Show("Ожидайте выстрела противника!");
-                    Server();
+                backgroundWorker = new BackgroundWorker();
+                backgroundWorker.DoWork += BackgroundWorker_DoWork;
+                backgroundWorker.RunWorkerAsync();
                 }
          /*   } */
             else
@@ -693,77 +698,23 @@ namespace SeaBattle
 
 
         }
-        public void Shot(Ship x)
-        {
-            if (x != null)
-            {
-                Shot2(x);
-                MessageBox.Show("Ожидайте хода противника!");
-                Server();
-            }
-        }
-        public void Shot2(Ship x)
-        {
-            if (x != null)
-            {
-            try
-            {
-                TcpClient client = new TcpClient();
-                client.Connect("127.0.0.1", 11111);
-                NetworkStream tcpStream = client.GetStream();
 
-                string send = x.Name.ToString(); // начало формирования ответа
-                byte[] msg = Encoding.UTF8.GetBytes(send);
-                tcpStream.Write(msg, 0, msg.Length);
-
-                byte[] bytes = new byte[client.ReceiveBufferSize]; // буфер входящей информации
-                tcpStream.Read(bytes, 0, bytes.Length);
-                string input = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                int shoting = Convert.ToInt32(input);
-                    if (shoting == 0)
-                    {
-                        EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
-                        Ship shot = new Ship();
-                        shot.Content = "";
-                        shot.Name = "O";
-                        shot.IsEnabled = false;
-                        EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
-                    }
-                else
-                {
-                    if (shoting == 1)
-                    {
-                        EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
-                        Ship shot = new Ship();
-                        shot.Content = "";
-                        shot.Name = "X";
-                        shot.IsEnabled = false;
-                        EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
-                    }
-                }
-                tcpStream.Close();
-                client.Close();
-                }
-                catch (SocketException ex)
-                {MessageBox.Show(ex.ToString());}
-                catch (Exception ex)
-                {MessageBox.Show(ex.ToString());}
-            }
-        }
-        public void Server()
+        private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
-            try
-            {
-                listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
-                listener.Start();
-                TcpClient newClient = listener.AcceptTcpClient();
-                NetworkStream tcpStream = newClient.GetStream();
-                byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
-                tcpStream.Read(bytes, 0, bytes.Length);
+            listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
+            listener.Start();
+            TcpClient newClient = listener.AcceptTcpClient();
+            NetworkStream tcpStream = newClient.GetStream();
+            byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
+            tcpStream.Read(bytes, 0, bytes.Length);
 
-                // проверка попал ли выстрел по кораблю
-                string str = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                int read = Convert.ToInt32(str);
+            // проверка попал ли выстрел по кораблю
+            string str = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+            int read = Convert.ToInt32(str);
+
+            _dispatcher.Invoke(new Action(() =>
+
+            {
                 if (MyShips.ElementAt(read).Deck == 0)
                 {
                     string negative = "0";
@@ -788,6 +739,123 @@ namespace SeaBattle
                     shot.IsEnabled = false;
                     MyShips.Insert(read, shot);
                 }
+
+            }));
+            
+
+            tcpStream.Close();
+            listener.Stop();
+        }
+
+        public void Shot(Ship x)
+        {
+            if (x != null)
+            {
+                Shot2(x);
+                MessageBox.Show("Ожидайте хода противника!");
+                backgroundWorker = new BackgroundWorker();
+                backgroundWorker.DoWork += BackgroundWorker_DoWork;
+                backgroundWorker.RunWorkerAsync();
+            }
+        }
+        public void Shot2(Ship x)
+        {
+            if (x != null)
+            {
+            try
+            {
+                TcpClient client = new TcpClient();
+                client.Connect("127.0.0.1", 11111);
+                NetworkStream tcpStream = client.GetStream();
+
+                string send = x.Name.ToString(); // начало формирования ответа
+                byte[] msg = Encoding.UTF8.GetBytes(send);
+                tcpStream.Write(msg, 0, msg.Length);
+
+                byte[] bytes = new byte[client.ReceiveBufferSize]; // буфер входящей информации
+                tcpStream.Read(bytes, 0, bytes.Length);
+                string input = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                int shoting = Convert.ToInt32(input);
+                    _dispatcher.Invoke(new Action(() =>
+
+                    {
+                        if (shoting == 0)
+                        {
+                            EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                            Ship shot = new Ship();
+                            shot.Content = "";
+                            shot.Name = "O";
+                            shot.IsEnabled = false;
+                            EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                        }
+                        else
+                        {
+                            if (shoting == 1)
+                            {
+                                EnemyShips.RemoveAt(Convert.ToInt32(x.Name));
+                                Ship shot = new Ship();
+                                shot.Content = "";
+                                shot.Name = "X";
+                                shot.IsEnabled = false;
+                                EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
+                            }
+                        }
+
+                    }));
+                  
+                tcpStream.Close();
+                client.Close();
+                }
+                catch (SocketException ex)
+                {MessageBox.Show(ex.ToString());}
+                catch (Exception ex)
+                {MessageBox.Show(ex.ToString());}
+            }
+        }
+        public void Server()
+        {
+            try
+            {
+                listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
+                listener.Start();
+                TcpClient newClient = listener.AcceptTcpClient();
+                NetworkStream tcpStream = newClient.GetStream();
+                byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
+                tcpStream.Read(bytes, 0, bytes.Length);
+
+                // проверка попал ли выстрел по кораблю
+                string str = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
+                int read = Convert.ToInt32(str);
+                _dispatcher.Invoke(new Action(() =>
+
+                {
+                    if (MyShips.ElementAt(read).Deck == 0)
+                    {
+                        string negative = "0";
+                        byte[] ans = Encoding.UTF8.GetBytes(negative);
+                        tcpStream.Write(ans, 0, ans.Length);
+                        MyShips.RemoveAt(read);
+                        Ship shot = new Ship();
+                        shot.Content = "";
+                        shot.Name = "O";
+                        shot.IsEnabled = false;
+                        MyShips.Insert(read, shot);
+                    }
+                    else
+                    {
+                        string positive = "1";
+                        byte[] ans = Encoding.UTF8.GetBytes(positive);
+                        tcpStream.Write(ans, 0, ans.Length);
+                        MyShips.RemoveAt(read);
+                        Ship shot = new Ship();
+                        shot.Content = "";
+                        shot.Name = "X";
+                        shot.IsEnabled = false;
+                        MyShips.Insert(read, shot);
+                    }
+
+                }));
+               
 
                 tcpStream.Close();
             }
