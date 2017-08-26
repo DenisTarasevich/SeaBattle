@@ -17,6 +17,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition />
             <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
         </Grid.RowDefinitions>
         
         <ListView
@@ -38,9 +40,7 @@
                     Width="22"
                     Height="Auto"
                     Content="{Binding Name}" 
-                    Click="Button_Click"
-                    Command="{Binding ElementName=rootWindow,
-                    Path=DataContext.SetShipCommand}"/>
+                    Click="Button_Click"/>
             </DataTemplate>
                 </ListView.ItemTemplate>
             <ListView.ItemsPanel>
@@ -53,7 +53,13 @@
                 </ListView.ItemsPanel>
             </ListView>
 
-        
+        <Button Grid.Column="0"
+                Grid.Row="1"
+                Command="{Binding SetShipCommand}"
+                CommandParameter="{Binding SelectedItem, ElementName=MyField}"
+                VerticalAlignment="Center"
+                Margin="10, 0"
+                Padding="10, 0">Установить корабль!</Button>
         
     <ListView
         ScrollViewer.HorizontalScrollBarVisibility="Hidden"
@@ -76,8 +82,7 @@
                     Width="22"
                     Height="Auto"
                     Content="{Binding Name}" 
-                    Click="Button_Click"
-                    Command="{Binding ShotCommand}"/>
+                    Click="Button_Click"/>
                 </DataTemplate>
             </ListView.ItemTemplate>
 
@@ -91,12 +96,27 @@
             </ListView.ItemsPanel>
         </ListView>
 
+        <Button Grid.Column="0"
+                Grid.Row="2"
+                Command="{Binding StartCommand}"
+                VerticalAlignment="Center"
+                Margin="10, 0"
+                Padding="10, 0">Начать игру!</Button>
+
+        <Button Grid.Column="0"
+                Grid.Row="3"
+                Command="{Binding ResetCommand}"
+                CommandParameter="{Binding ElementName=MyField}"
+                VerticalAlignment="Center"
+                Margin="10, 0"
+                Padding="10, 0">Сбросить расстановку кораблей</Button>
+
         <Button Grid.Column="2"
-                Grid.Row="1"
+                Grid.Row="2"
                 Command="{Binding ShotCommand}"
                 CommandParameter="{Binding SelectedItem, ElementName=EnemyField}"
                 VerticalAlignment="Center"
                 Margin="10, 0"
                 Padding="10, 0">Зааааааалп!</Button>
-         </Grid>
+    </Grid>
 </Window>

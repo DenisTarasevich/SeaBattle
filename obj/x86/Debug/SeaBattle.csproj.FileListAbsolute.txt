@@ -23,3 +23,15 @@ C:\Users\Square\Desktop\21 августа\SeaBattle\SeaBattle\obj\x86\Debug\SeaB
 C:\Users\Square\Desktop\21 августа\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.g.resources
 C:\Users\Square\Desktop\21 августа\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.Properties.Resources.resources
 C:\Users\Square\Desktop\21 августа\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.csproj.GenerateResource.Cache
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.exe
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.pdb
+G:\SeaBattle\SeaBattle\bin\Debug\SeaBattle.exe
+G:\SeaBattle\SeaBattle\bin\Debug\SeaBattle.pdb
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.csprojResolveAssemblyReference.cache
+G:\SeaBattle\SeaBattle\obj\x86\Debug\MainWindow.baml
+G:\SeaBattle\SeaBattle\obj\x86\Debug\MainWindow.g.cs
+G:\SeaBattle\SeaBattle\obj\x86\Debug\App.g.cs
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle_MarkupCompile.cache
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.g.resources
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.Properties.Resources.resources
+G:\SeaBattle\SeaBattle\obj\x86\Debug\SeaBattle.csproj.GenerateResource.Cache
