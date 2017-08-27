@@ -57,6 +57,7 @@
                 Grid.Row="1"
                 Command="{Binding SetShipCommand}"
                 CommandParameter="{Binding SelectedItem, ElementName=MyField}"
+                IsEnabled="{Binding Path=SetShipEnabled}"
                 VerticalAlignment="Center"
                 Margin="10, 0"
                 Padding="10, 0">Установить корабль!</Button>
@@ -99,6 +100,7 @@
         <Button Grid.Column="0"
                 Grid.Row="2"
                 Command="{Binding StartCommand}"
+                IsEnabled="{Binding Path=StartEnabled}"
                 VerticalAlignment="Center"
                 Margin="10, 0"
                 Padding="10, 0">Начать игру!</Button>
@@ -107,6 +109,7 @@
                 Grid.Row="3"
                 Command="{Binding ResetCommand}"
                 CommandParameter="{Binding ElementName=MyField}"
+                IsEnabled="{Binding Path=ResetEnabled}"
                 VerticalAlignment="Center"
                 Margin="10, 0"
                 Padding="10, 0">Сбросить расстановку кораблей</Button>
@@ -115,6 +118,7 @@
                 Grid.Row="2"
                 Command="{Binding ShotCommand}"
                 CommandParameter="{Binding SelectedItem, ElementName=EnemyField}"
+                IsEnabled="{Binding Path=ShotEnabled}"
                 VerticalAlignment="Center"
                 Margin="10, 0"
                 Padding="10, 0">Зааааааалп!</Button>

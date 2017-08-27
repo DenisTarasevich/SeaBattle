@@ -71,6 +71,41 @@ namespace SeaBattle
         TcpListener listener = null;
         BackgroundWorker backgroundWorker;
         Dispatcher _dispatcher;
+        private Boolean startenabled;
+        public Boolean StartEnabled { get { return startenabled; }
+                                      set { startenabled = value;
+                                            NotifyPropertyChanged("StartEnabled");} }
+        private Boolean setshipenabled;
+        public Boolean SetShipEnabled
+        {
+            get { return setshipenabled; }
+            set
+            {
+                setshipenabled = value;
+                NotifyPropertyChanged("SetShipEnabled");
+            }
+        }
+        private Boolean resetenabled;
+        public Boolean ResetEnabled
+        {
+            get { return resetenabled; }
+            set
+            {
+                resetenabled = value;
+                NotifyPropertyChanged("ResetEnabled");
+            }
+        }
+        private Boolean shotenabled;
+        public Boolean ShotEnabled
+        {
+            get { return shotenabled; }
+            set
+            {
+                shotenabled = value;
+                NotifyPropertyChanged("ShotEnabled");
+            }
+        }
+
         public ViewModel()
         {
             MyShips = new ObservableCollection<Ship>();
@@ -99,6 +134,10 @@ namespace SeaBattle
             ResetCommand = new RelayCommand<Ship>(Reset);
             sh = 20; // счетчик палуб (четыре, три, три, два два два, одинодинодинодин)
             _dispatcher = Dispatcher.CurrentDispatcher;
+            StartEnabled = false;
+            SetShipEnabled = true;
+            ResetEnabled = true;
+            ShotEnabled = false;
         }
 
 
@@ -652,51 +691,46 @@ namespace SeaBattle
             if (sh == 0)
             {
                 MessageBox.Show("Корабли закончились!");
+                StartEnabled = true;
+                SetShipEnabled = false;
             }
         }
         public void Start(Ship x)
         {
-     /*       // валидация расстановки кораблей
-            ObservableCollection<Ship> ValidShips = new ObservableCollection<Ship>();
-            foreach (Ship item in MyShips)
-            {
-                if (item.Background == "Green")
-                {
-                    ValidShips.Add(item);
-                }
-            }
-                        
-            var query4 = from s in MyShips
-                         where s.Background == "Green" 
-                         && MyShips.ElementAt(Convert.ToInt32(s.Name) + 10).Background == "Green"
-                         && MyShips.ElementAt(Convert.ToInt32(s.Name) + 20).Background == "Green"
-                         && MyShips.ElementAt(Convert.ToInt32(s.Name) + 30).Background == "Green"
-                         select s;
-            foreach (var item in query4)
-            {
-                MessageBox.Show(item.Name);
-            }
+            /*       // валидация расстановки кораблей
+                   ObservableCollection<Ship> ValidShips = new ObservableCollection<Ship>();
+                   foreach (Ship item in MyShips)
+                   {
+                       if (item.Background == "Green")
+                       {
+                           ValidShips.Add(item);
+                       }
+                   }
 
-
-            if (ValidShips.Count() == 20)
-            {    */
-                if (
-                    MessageBox.Show("Вы сервер?", "Время выбирать, каналья!", MessageBoxButton.YesNo, MessageBoxImage.Question)
-                    == MessageBoxResult.Yes
-                    )
-                {
-                    MessageBox.Show("Ожидайте выстрела противника!");
+                   var query4 = from s in MyShips
+                                where s.Background == "Green" 
+                                && MyShips.ElementAt(Convert.ToInt32(s.Name) + 10).Background == "Green"
+                                && MyShips.ElementAt(Convert.ToInt32(s.Name) + 20).Background == "Green"
+                                && MyShips.ElementAt(Convert.ToInt32(s.Name) + 30).Background == "Green"
+                                select s;
+                   foreach (var item in query4)
+                   {
+                       MessageBox.Show(item.Name);
+                   }
+          */
+            if (
+                MessageBox.Show("Вы сервер?", "Время выбирать, каналья!", MessageBoxButton.YesNo, MessageBoxImage.Question)
+                == MessageBoxResult.Yes
+                )
+            {
+                MessageBox.Show("Ожидайте выстрела противника!");
                 backgroundWorker = new BackgroundWorker();
                 backgroundWorker.DoWork += BackgroundWorker_DoWork;
                 backgroundWorker.RunWorkerAsync();
-                }
-         /*   } */
-            else
-            {
-                MessageBox.Show("Вы расставили не все корабли!");
+                ResetEnabled = false;
+                StartEnabled = false;
             }
-
-
+            else { MessageBox.Show("Стреляйте!"); ResetEnabled = false; ShotEnabled = true; StartEnabled = false; }
         }
 
         private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -713,7 +747,6 @@ namespace SeaBattle
             int read = Convert.ToInt32(str);
 
             _dispatcher.Invoke(new Action(() =>
-
             {
                 if (MyShips.ElementAt(read).Deck == 0)
                 {
@@ -726,6 +759,7 @@ namespace SeaBattle
                     shot.Name = "O";
                     shot.IsEnabled = false;
                     MyShips.Insert(read, shot);
+                    ShotEnabled = true;
                 }
                 else
                 {
@@ -738,10 +772,10 @@ namespace SeaBattle
                     shot.Name = "X";
                     shot.IsEnabled = false;
                     MyShips.Insert(read, shot);
+                    ShotEnabled = true;
                 }
 
             }));
-            
 
             tcpStream.Close();
             listener.Stop();
@@ -756,6 +790,7 @@ namespace SeaBattle
                 backgroundWorker = new BackgroundWorker();
                 backgroundWorker.DoWork += BackgroundWorker_DoWork;
                 backgroundWorker.RunWorkerAsync();
+                ShotEnabled = false;
             }
         }
         public void Shot2(Ship x)
@@ -777,7 +812,6 @@ namespace SeaBattle
                 string input = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
                 int shoting = Convert.ToInt32(input);
                     _dispatcher.Invoke(new Action(() =>
-
                     {
                         if (shoting == 0)
                         {
@@ -800,7 +834,6 @@ namespace SeaBattle
                                 EnemyShips.Insert(Convert.ToInt32(x.Name), shot);
                             }
                         }
-
                     }));
                   
                 tcpStream.Close();
@@ -810,69 +843,6 @@ namespace SeaBattle
                 {MessageBox.Show(ex.ToString());}
                 catch (Exception ex)
                 {MessageBox.Show(ex.ToString());}
-            }
-        }
-        public void Server()
-        {
-            try
-            {
-                listener = new TcpListener(IPAddress.Parse("127.0.0.1"), 11111);
-                listener.Start();
-                TcpClient newClient = listener.AcceptTcpClient();
-                NetworkStream tcpStream = newClient.GetStream();
-                byte[] bytes = new byte[newClient.ReceiveBufferSize]; // буфер входящей информации
-                tcpStream.Read(bytes, 0, bytes.Length);
-
-                // проверка попал ли выстрел по кораблю
-                string str = Encoding.UTF8.GetString(bytes, 0, bytes.Length);
-                int read = Convert.ToInt32(str);
-                _dispatcher.Invoke(new Action(() =>
-
-                {
-                    if (MyShips.ElementAt(read).Deck == 0)
-                    {
-                        string negative = "0";
-                        byte[] ans = Encoding.UTF8.GetBytes(negative);
-                        tcpStream.Write(ans, 0, ans.Length);
-                        MyShips.RemoveAt(read);
-                        Ship shot = new Ship();
-                        shot.Content = "";
-                        shot.Name = "O";
-                        shot.IsEnabled = false;
-                        MyShips.Insert(read, shot);
-                    }
-                    else
-                    {
-                        string positive = "1";
-                        byte[] ans = Encoding.UTF8.GetBytes(positive);
-                        tcpStream.Write(ans, 0, ans.Length);
-                        MyShips.RemoveAt(read);
-                        Ship shot = new Ship();
-                        shot.Content = "";
-                        shot.Name = "X";
-                        shot.IsEnabled = false;
-                        MyShips.Insert(read, shot);
-                    }
-
-                }));
-               
-
-                tcpStream.Close();
-            }
-            catch (SocketException ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString());
-            }
-            finally
-            {
-                if (listener != null)
-                {
-                    listener.Stop();
-                }
             }
         }
         public void Reset(Ship x)
@@ -890,6 +860,8 @@ namespace SeaBattle
                 test.Background = "LightGray";
                 MyShips.Add(test);
             }
+            StartEnabled = false;
+            SetShipEnabled = true;
         }
     }
 }
